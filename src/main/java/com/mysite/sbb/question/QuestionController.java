@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.mysite.sbb.answer.AnswerForm;
+import com.mysite.sbb.entity.AnswerForm;
 import com.mysite.sbb.entity.Question;
 import com.mysite.sbb.entity.QuestionForm;
 import com.mysite.sbb.entity.SiteUser;
@@ -89,6 +89,15 @@ public class QuestionController {
     		throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
     	}
     	this.questionService.modify(question, questionForm.getSubject(), questionForm.getContent());
+        return String.format("redirect:/question/detail/%s", id);
+    }
+    
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/vote/{id}")
+    public String questionVote(Principal principal, @PathVariable("id") Integer id) {
+        Question question = this.questionService.getQuestion(id);
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+        this.questionService.vote(question, siteUser);
         return String.format("redirect:/question/detail/%s", id);
     }
 }
